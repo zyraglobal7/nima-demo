@@ -54,31 +54,40 @@ export default function ProductPage({ params }: { params: Promise<{ id: string }
   }
 
   async function trackPurchaseEvent(event: 'added_to_cart' | 'purchased', trackingId?: string) {
-    if (!sessionToken) return;
+    if (!sessionToken) {
+      console.warn('[nima-track] Skipped — no sessionToken');
+      return;
+    }
+    const payload = {
+      sessionToken,
+      event,
+      itemValue: parsePriceCents(product.price),
+      currency: 'USD',
+      ...(trackingId && { trackingId }),
+    };
+    console.log('[nima-track] Sending:', payload);
     try {
-      await fetch('/api/nima-track', {
+      const res = await fetch('/api/nima-track', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          sessionToken,
-          event,
-          itemValue: parsePriceCents(product.price),
-          currency: 'USD',
-          ...(trackingId && { trackingId }),
-        }),
+        body: JSON.stringify(payload),
       });
-    } catch {
-      // Tracking is best-effort; don't surface errors to the user
+      const data = await res.json();
+      console.log('[nima-track] Response:', res.status, data);
+    } catch (err) {
+      console.error('[nima-track] Network error:', err);
     }
   }
 
   async function handleAddToCart() {
+    console.log('[cart] Add to cart clicked — product:', product.id);
     await trackPurchaseEvent('added_to_cart');
     // TODO: real cart logic
   }
 
   async function handleBuyNow() {
     const orderId = `order_${Date.now()}`;
+    console.log('[cart] Buy now clicked — product:', product.id, 'orderId:', orderId);
     await trackPurchaseEvent('purchased', orderId);
     // TODO: real checkout logic
   }

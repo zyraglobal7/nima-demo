@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-// Use NIMA_API_URL from env to switch between dev Convex URL and Nima's hosted API
-const NIMA_URL =
-  process.env.NIMA_API_URL ?? 'https://gallant-tortoise-992.convex.site/api/v1/sessions';
+const NIMA_URL = process.env.NIMA_API_URL!;
 
 export async function POST(req: NextRequest) {
   console.log('\n[nima-session] ── Incoming request ──────────────────────────');

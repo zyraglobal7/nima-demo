@@ -8,7 +8,7 @@ import { products } from '../../lib/products';
 export default function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const product = products.find((p) => p.id === id);
-  if (!product) notFound();
+  if (!product) return notFound();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
